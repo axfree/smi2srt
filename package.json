@@ -1,0 +1,29 @@
+{
+  "name": "smi2srt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "smi2srt.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "smi2srt": "smi2srt.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axfree/smi2srt.git"
+  },
+  "author": "AX Free <axfree@live.com> (http://axfree.net)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/axfree/smi2srt/issues"
+  },
+  "homepage": "https://github.com/axfree/smi2srt#readme",
+  "dependencies": {
+    "cheerio": "^0.20.0",
+    "iconv-lite": "^0.4.13",
+    "minimist": "^1.2.0",
+    "node-icu-charset-detector": "^0.2.0",
+    "sprintf-js": "^1.0.3"
+  }
+}
