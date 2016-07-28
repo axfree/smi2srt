@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var minimist  = require('minimist');
+var argv      = require('commander');
 var fs        = require('fs');
 var path      = require('path');
 var sprintf   = require('sprintf-js').sprintf;
@@ -9,36 +9,25 @@ var charsetDetector
 var iconv     = require('iconv-lite');
 var cheerio   = require('cheerio');
 
-var argv = minimist(process.argv.slice(2), {
-    alias: {
-        'encoding': 'e',
-        'help': 'h',
-        'output': 'o',
-        'time-offset': 't',
-    },
-    boolean: [ 'n' ]
-});
+argv
+    .version('1.0.0', '-v, --version')
+    .description('smi2srt by axfree')
+    .arguments('<file>')
+    .option('-e, --encoding <encoding>', 'specify the encoding of input file')
+    .option('-n', 'do not overwrite an existing file')
+    .option('-o, --output <filename>', 'write to FILE')
+    .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
+    .parse(process.argv);
 
-//console.log(process.argv);
-
-if (argv.h || argv._.length == 0) {
-    console.log(
-        'Usage: smi2srt [options] input.smi\n' +
-        'Options:\n' +
-        '  -e, --encoding      specify the encoding of input file\n' +
-        '  -h, --help          show usage information\n' +
-        '  -n                  do not overwrite an existing file\n' +
-        '  -o, --output FILE   write to FILE\n' +
-        '  -t, --time-offset   specify the time offset in miliseconds\n'
-    );
-
-    return 0;
+if (argv.args.length == 0) {
+    argv.outputHelp();
+    process.exit(0);
 }
 
-var optSrc = argv._[0];
-var optDest = argv.o;
-var optEncoding = argv.e;   // || "CP949";
-var optTimeOffset = argv.t || 0;
+var optSrc = argv.args[0];
+var optDest = argv.output;
+var optEncoding = argv.encoding;   // || "CP949";
+var optTimeOffset = argv.timeOffset || 0;
 
 var srcName = optSrc;
 var srcExt;
