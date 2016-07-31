@@ -190,6 +190,51 @@ else if (/^1\n/.test(text)) {
 
     return 0;
 }
+else if (/^\[Script Info\]/.test(text)) {
+    // fs.writeFileSync('ass.json', JSON.stringify(sections));
+
+    if (!outputFile)
+        outputFile = srcName + '.' + (srcLang || 'ko') + '.srt';
+
+    if (argv.n) {
+        if (fs.existsSync(outputFile)) {
+            console.log("File exists:", path.basename(outputFile));
+            return 0;
+        }
+    }
+
+    console.log(outputFile);
+
+    var fd = fs.openSync(outputFile, 'w');
+
+    var sections = {};
+    text.split('\n\n').map(sect => {
+        sect.replace(/^\[(.*?)\]\n([^]*)$/, (m, hdr, cont) => {
+            sections[hdr] = cont;
+        });
+    });
+
+    var j = 1;
+    var events = sections['Events'];
+    events.split('\n').forEach((e, idx) => {
+        if (idx == 0) return;
+        //          Format Layer Start                      End                        Style Name  MarginL,R,V       Effect
+        e.replace(/^(.*?): (\d+),(\d):(\d\d):(\d\d)\.(\d\d),(\d):(\d\d):(\d\d)\.(\d\d),(.*?),(.*?),(\d+),(\d+),(\d+),(.*?),(.*)$/,
+          (m, format, layer, s1, s2, s3, s4, e1, e2, e3, e4, style, name, marginL, marginR, marginV, effect, text) => {
+              var start = 1000 * (60 * (60 * parseInt(s1) + parseInt(s2)) + parseInt(s3)) + parseInt(s4) * 10;
+              var end = 1000 * (60 * (60 * parseInt(e1) + parseInt(e2)) + parseInt(e3)) + parseInt(e4) * 10;
+
+              text = text.replace(/\{\\c&H([0-9a-f]{6})&\}(.*?)\{\\c\}/, '<font color="#$1">$2</font>')
+                         .replace(/\{\\.*?}/, '')
+                         .replace(/\\N/g, '\n');
+              fs.write(fd, (j++) + '\n' + formatTime(start + optTimeOffset) + ' --> ' + formatTime(end + optTimeOffset) + '\n' + text + '\n\n');
+          });
+    });
+
+    fs.close(fd);
+
+    return 0;
+}
 else {
     console.error("Unknown file format", [ text.charCodeAt(0), text.charCodeAt(1), text.charCodeAt(2) ]);
 
