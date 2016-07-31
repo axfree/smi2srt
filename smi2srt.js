@@ -10,7 +10,7 @@ var iconv     = require('iconv-lite');
 var cheerio   = require('cheerio');
 
 argv
-    .version('1.0.1', '-v, --version')
+    .version('1.0.2', '-v, --version')
     .description('smi2srt by axfree')
     .arguments('<file>')
     .option('-e, --encoding <encoding>', 'specify the encoding of input file')
@@ -33,7 +33,7 @@ var srcName = optSrc;
 var srcExt;
 var srcLang;
 
-var sv = srcName.match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap))?(?:\.(smi|smil|srt))?$/);
+var sv = srcName.match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap))?(?:\.(smi|smil|srt|ass))?$/);
 if (sv) {
     srcName = sv[1];
     srcLang = sv[2];

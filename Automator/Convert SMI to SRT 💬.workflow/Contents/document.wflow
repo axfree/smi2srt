@@ -59,7 +59,8 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>/usr/local/bin/smi2srt -n "$@" &gt; /tmp/smi2srt.log 2&gt;&amp;1
+					<string>PATH=/usr/local/bin:$PATH
+smi2srt -n "$@" &gt; /tmp/smi2srt.log 2&gt;&amp;1
 if [ $? -ne 0 ]; then
   osascript -e "display dialog \"`cat /tmp/smi2srt.log`\" with title \"smi2srt\""
 else
