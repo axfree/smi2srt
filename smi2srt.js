@@ -10,7 +10,7 @@ var iconv     = require('iconv-lite');
 var cheerio   = require('cheerio');
 
 argv
-    .version('1.0.0', '-v, --version')
+    .version('1.0.1', '-v, --version')
     .description('smi2srt by axfree')
     .arguments('<file>')
     .option('-e, --encoding <encoding>', 'specify the encoding of input file')
