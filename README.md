@@ -1,5 +1,5 @@
 # smi2srt
-Convert subtitles in ".smi" format to ".srt" format.
+Convert subtitles in ".smi" or ".ass" format to ".srt" format.
 
 ## Prerequisits
 [Node.js](https://nodejs.org)

@@ -10,7 +10,7 @@ var iconv     = require('iconv-lite');
 var cheerio   = require('cheerio');
 
 argv
-    .version('1.0.2', '-v, --version')
+    .version('1.0.3', '-v, --version')
     .description('smi2srt by axfree')
     .arguments('<file>')
     .option('-e, --encoding <encoding>', 'specify the encoding of input file')
@@ -19,10 +19,8 @@ argv
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
     .parse(process.argv);
 
-if (argv.args.length == 0) {
-    argv.outputHelp();
-    process.exit(0);
-}
+if (argv.args.length == 0)
+    argv.help();
 
 var optSrc = argv.args[0];
 var optDest = argv.output;
@@ -221,14 +219,53 @@ else if (/^\[Script Info\]/.test(text)) {
         //          Format Layer Start                      End                        Style Name  MarginL,R,V       Effect
         e.replace(/^(.*?): (\d+),(\d):(\d\d):(\d\d)\.(\d\d),(\d):(\d\d):(\d\d)\.(\d\d),(.*?),(.*?),(\d+),(\d+),(\d+),(.*?),(.*)$/,
           (m, format, layer, s1, s2, s3, s4, e1, e2, e3, e4, style, name, marginL, marginR, marginV, effect, text) => {
-              var start = 1000 * (60 * (60 * parseInt(s1) + parseInt(s2)) + parseInt(s3)) + parseInt(s4) * 10;
-              var end = 1000 * (60 * (60 * parseInt(e1) + parseInt(e2)) + parseInt(e3)) + parseInt(e4) * 10;
+            var start = 1000 * (60 * (60 * parseInt(s1) + parseInt(s2)) + parseInt(s3)) + parseInt(s4) * 10;
+            var end = 1000 * (60 * (60 * parseInt(e1) + parseInt(e2)) + parseInt(e3)) + parseInt(e4) * 10;
 
-              text = text.replace(/\{\\c&H([0-9a-f]{6})&\}(.*?)\{\\c\}/, '<font color="#$1">$2</font>')
-                         .replace(/\{\\.*?}/, '')
-                         .replace(/\\N/g, '\n');
-              fs.write(fd, (j++) + '\n' + formatTime(start + optTimeOffset) + ' --> ' + formatTime(end + optTimeOffset) + '\n' + text + '\n\n');
-          });
+            text = text.replace(/\\N/g, '\n')
+                       .replace(/{(.*?)}/g, (m, cmds) => {
+                var tags = '';
+                cmds.split('\\').forEach((cmd, idx) => {
+                    if (idx == 0) return;
+                    var m = cmd.match(/^([a-z]+)(.*)$/);
+                    if (m) {
+                        switch (m[1]) {
+                            case 'c':
+                                var colorMatch = m[2].match(/&H(.*)&/);
+                                if (colorMatch)
+                                    tags += `<font color="#${colorMatch[1]}">`;
+                                break;
+
+                            case 'i':
+                            case 'b':
+                                if (m[2] == 1)
+                                    tags += `<${m[1]}>`;
+                                else
+                                    tags += `</${m[1]}>`;
+                                break;
+
+                            case 'fs':
+                            case 'pos':
+                                break;
+
+                            default:
+                                console.error(`unknown command: ${cmd}`);
+                        }
+                    }
+                });
+
+                return tags;
+            });
+
+            // // fix unbalanced tags
+            // text = cheerio.load(text, {
+            //      normalizeWhitespace:true,
+            //                  xmlMode:false,
+            //           decodeEntities:false
+            // }).html();
+
+            fs.write(fd, `${j++}\n${formatTime(start + optTimeOffset)} --> ${formatTime(end + optTimeOffset)}\n${text}\n\n`);
+        });
     });
 
     fs.close(fd);
