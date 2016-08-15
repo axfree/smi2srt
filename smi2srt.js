@@ -10,7 +10,7 @@ var iconv     = require('iconv-lite');
 var cheerio   = require('cheerio');
 
 argv
-    .version('1.0.3', '-v, --version')
+    .version(require('./package').version, '-v, --version')
     .description('smi2srt by axfree')
     .arguments('<file>')
     .option('-e, --encoding <encoding>', 'specify the encoding of input file')
@@ -111,23 +111,13 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
         var j = 1;
         var fd = fs.openSync(outputFile, 'w');
 
-        $('sync').each(function (i, e) {
+        $('sync').get().sort((a, b) => { return +$(a).attr('start') - +$(b).attr('start') }).forEach((e, idx) => {
             var sync = $(e);
             var start = parseInt(sync.attr('start'));
             var end = parseInt(sync.next().attr('start'));
 
             if (!end)
                 return;
-            if (start > end) {
-                var nextStart = sync.next().next().attr('start');
-                if (nextStart && nextStart - start > 500) {
-                    var newEnd = start + Math.floor(Math.min(3000, (nextStart - start) / 2));
-                    console.log('Sync adjusted: start=' + start + ', end=' + end + ' -> ' + newEnd);
-                    end = newEnd;
-                }
-                else
-                    throw new Error('Sync invalid: start=' + start + ', end=' + end);
-            }
 
             var p = sync.find('p');
             if (p.length == 0)
