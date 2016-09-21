@@ -123,7 +123,7 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
             if (p.length == 0)
                 p = sync;
 
-            if (p.text().trim() != '&nbsp;') {
+            if (p.text() != '' && p.text().trim() != '&nbsp;') {
                 fs.write(fd, j + '\n');
                 fs.write(fd, formatTime(start + optTimeOffset) + ' --> ' + formatTime(end + optTimeOffset) + '\n');
                 fs.write(fd, p.html().replace(/<br>\s*/g, '\n').trim() + '\n');
@@ -139,7 +139,7 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
 
     return 0;
 }
-else if (/^1\n/.test(text)) {
+else if (/^\d{1,3}\n/.test(text)) {
     var outputFile = optDest;
 
     if (!outputFile)
