@@ -1,6 +1,6 @@
 {
   "name": "smi2srt",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": "smi2srt.js",
   "scripts": {
@@ -20,10 +20,10 @@
   },
   "homepage": "https://github.com/axfree/smi2srt#readme",
   "dependencies": {
+    "charset-detector": "0.0.2",
     "cheerio": "^0.20.0",
     "commander": "^2.9.0",
     "iconv-lite": "^0.4.13",
-    "node-icu-charset-detector": "^0.2.0",
     "sprintf-js": "^1.0.3"
   }
 }

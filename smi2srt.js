@@ -5,7 +5,7 @@ var fs        = require('fs');
 var path      = require('path');
 var sprintf   = require('sprintf-js').sprintf;
 var charsetDetector
-              = require("node-icu-charset-detector");
+              = require("charset-detector");
 var iconv     = require('iconv-lite');
 var cheerio   = require('cheerio');
 
@@ -13,7 +13,6 @@ argv
     .version(require('./package').version, '-v, --version')
     .description('smi2srt by axfree')
     .arguments('<file>')
-    .option('-e, --encoding <encoding>', 'specify the encoding of input file')
     .option('-n', 'do not overwrite an existing file')
     .option('-o, --output <filename>', 'write to FILE')
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
@@ -24,7 +23,6 @@ if (argv.args.length == 0)
 
 var optSrc = argv.args[0];
 var optDest = argv.output;
-var optEncoding = argv.encoding;   // || "CP949";
 var optTimeOffset = argv.timeOffset || 0;
 
 var srcName = optSrc;
@@ -36,25 +34,13 @@ if (sv) {
     srcName = sv[1];
     srcLang = sv[2];
     srcExt = sv[3];
-
-    if (!optEncoding && srcExt == 'srt')
-        optEncoding = 'utf8';
 }
 
 var buffer = fs.readFileSync(optSrc);
-var charset;
 
-if (charsetDetector)
-    charset = charsetDetector.detectCharset(buffer).toString();
-else {
-    charset = optEncoding || 'CP949';
-    if (buffer[0] == 0xef && buffer[1] == 0xbb && buffer[2] == 0xbf)    // \uFEFF (BOM)
-        charset = 'utf8';
-    else if (buffer[0] == 0xff && buffer[1] == 0xfe)
-        charset = 'utf16-le';
-    else if (buffer[0] == 0xfe && buffer[1] == 0xff)
-        charset = 'utf16-be';
-}
+// detect charset
+var matches = charsetDetector(buffer);
+var charset = matches[0].charsetName;
 
 var text = iconv.decode(buffer, charset).replace(/\r\n/g, '\n');
 
