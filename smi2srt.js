@@ -110,17 +110,17 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
                 p = sync;
 
             if (p.text() != '' && p.text().trim() != '&nbsp;') {
-                fs.write(fd, j + '\n');
-                fs.write(fd, formatTime(start + optTimeOffset) + ' --> ' + formatTime(end + optTimeOffset) + '\n');
-                fs.write(fd, p.html().replace(/<br>\s*/g, '\n').trim() + '\n');
-                fs.write(fd, '\n');
+                fs.writeSync(fd, j + '\n');
+                fs.writeSync(fd, formatTime(start + optTimeOffset) + ' --> ' + formatTime(end + optTimeOffset) + '\n');
+                fs.writeSync(fd, p.html().replace(/<br>\s*/g, '\n').trim() + '\n');
+                fs.writeSync(fd, '\n');
                 j++;
             }
             else {
             }
         });
 
-        fs.close(fd);
+        fs.closeSync(fd);
     }
 
     return 0;
@@ -156,11 +156,11 @@ else if (/^\d{1,3}\n/.test(text)) {
 
                     return formatTime(start + optTimeOffset) + ' --> ' + formatTime(end + optTimeOffset);
                 });
-            fs.write(fd, (j++) + '\n' + nln + '\n\n');
+            fs.writeSync(fd, (j++) + '\n' + nln + '\n\n');
         }
     })
 
-    fs.close(fd);
+    fs.closeSync(fd);
 
     return 0;
 }
@@ -198,7 +198,7 @@ else if (/^\[Script Info\]/.test(text)) {
             var start = 1000 * (60 * (60 * parseInt(s1) + parseInt(s2)) + parseInt(s3)) + parseInt(s4) * 10;
             var end = 1000 * (60 * (60 * parseInt(e1) + parseInt(e2)) + parseInt(e3)) + parseInt(e4) * 10;
 
-            text = text.replace(/\\N/g, '\n')
+            text = text.replace(/\\N/gi, '\n')
                        .replace(/{(.*?)}/g, (m, cmds) => {
                 var tags = '';
                 cmds.split('\\').forEach((cmd, idx) => {
@@ -214,7 +214,8 @@ else if (/^\[Script Info\]/.test(text)) {
 
                             case 'i':
                             case 'b':
-                                if (m[2] == 1)
+                            case 'u':
+                                if (parseInt(m[2]) > 0)
                                     tags += `<${m[1]}>`;
                                 else
                                     tags += `</${m[1]}>`;
@@ -240,11 +241,11 @@ else if (/^\[Script Info\]/.test(text)) {
             //           decodeEntities:false
             // }).html();
 
-            fs.write(fd, `${j++}\n${formatTime(start + optTimeOffset)} --> ${formatTime(end + optTimeOffset)}\n${text}\n\n`);
+            fs.writeSync(fd, `${j++}\n${formatTime(start + optTimeOffset)} --> ${formatTime(end + optTimeOffset)}\n${text}\n\n`);
         });
     });
 
-    fs.close(fd);
+    fs.closeSync(fd);
 
     return 0;
 }
