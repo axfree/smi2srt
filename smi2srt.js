@@ -48,7 +48,7 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
     var syncs = text.match(/(<SYNC[^]*?)(?=\s*<SYNC|\s*<\/BODY)/gi);
     if (!syncs) {
         console.log("No sync found");
-        return;
+        process.exit(1);
     }
 
     var syncWithLang = {};
@@ -123,8 +123,6 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
 
         fs.closeSync(fd);
     }
-
-    return 0;
 }
 else if (/^\d{1,3}\n/.test(text)) {
     var outputFile = optDest;
@@ -135,7 +133,7 @@ else if (/^\d{1,3}\n/.test(text)) {
     if (argv.n) {
         if (fs.existsSync(outputFile)) {
             console.log("File exists:", path.basename(outputFile));
-            return 0;
+            process.exit(1);
         }
     }
 
@@ -162,8 +160,6 @@ else if (/^\d{1,3}\n/.test(text)) {
     })
 
     fs.closeSync(fd);
-
-    return 0;
 }
 else if (/^\[Script Info\]/.test(text)) {
     // fs.writeFileSync('ass.json', JSON.stringify(sections));
@@ -174,7 +170,7 @@ else if (/^\[Script Info\]/.test(text)) {
     if (argv.n) {
         if (fs.existsSync(outputFile)) {
             console.log("File exists:", path.basename(outputFile));
-            return 0;
+            process.exit(1);
         }
     }
 
@@ -247,13 +243,11 @@ else if (/^\[Script Info\]/.test(text)) {
     });
 
     fs.closeSync(fd);
-
-    return 0;
 }
 else {
     console.error("Unknown file format", [ text.charCodeAt(0), text.charCodeAt(1), text.charCodeAt(2) ]);
 
-    return 1;
+    process.exit(1);
 }
 
 function formatTime(t) {
