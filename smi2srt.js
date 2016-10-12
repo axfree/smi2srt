@@ -58,12 +58,13 @@ if (/^[\n\s]*<SAMI/i.test(text)) {
                          xmlMode:false,
                   decodeEntities:false
         }).html();
-        var lang = sync.match(/class="(.*?)"/) [1];
-        if (!syncWithLang[lang])
-            syncWithLang[lang] = [];
-        syncWithLang[lang].push(sync);
-        // syncs[idx] = sync;
-        // console.log(syncs[idx]);
+        var langMatch = sync.match(/class="(.*?)"/);
+        if (langMatch) {
+            var lang = langMatch[1];
+            if (!syncWithLang[lang])
+                syncWithLang[lang] = [];
+            syncWithLang[lang].push(sync);
+        }
     });
 
     for (var lang in syncWithLang) {
