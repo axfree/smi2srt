@@ -30,7 +30,7 @@ argv.args.forEach(f => {
     try {
         var stat = fs.statSync(f);
         if (stat.isDirectory())
-            files = walk(f);
+            files = walk(f).filter(file => file.match(/\.(smi|smil)$/));
         else
             files = [ f ];
     } catch(e) {
@@ -39,7 +39,7 @@ argv.args.forEach(f => {
     }
 
     files.forEach(file => {
-        var fileMatch = file.match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap))?(?:\.(smi|smil|srt|ass))?$/i);
+        var fileMatch = file.match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap))?(?:\.(smi|smil|srt|ass))$/i);
         if (!fileMatch)
             return;
         var baseFile = fileMatch[1];
