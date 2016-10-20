@@ -5,6 +5,7 @@
 var argv      = require('commander');
 var fs        = require('fs');
 var path      = require('path');
+var ps        = require('child_process');
 var sprintf   = require('sprintf-js').sprintf;
 var charsetDetector
               = require("charset-detector");
@@ -19,7 +20,13 @@ argv
     .arguments('<file>')
     .option('-n', 'do not overwrite an existing file')
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
+    .option('-i, --install-automator', 'install smi2srt OS X Automator')
     .parse(process.argv);
+
+if (argv.installAutomator) {
+    ps.execFileSync('open', [ __dirname + '/Automator/Convert SMI to SRT 💬.workflow']);
+    return;
+}
 
 if (argv.args.length == 0)
     argv.help();
@@ -50,15 +57,15 @@ argv.args.forEach(f => {
             var outputFile = baseFile + '.' + langCode + '.srt';
             if (argv.N) {
                 if (fs.existsSync(outputFile)) {
-                    console.log("File exists:", path.basename(outputFile));
+                    console.log('%s: not overwritten', path.basename(outputFile));
                     return;
                 }
             }
 
-            console.log(outputFile);
+            console.log('%s -> %s', file, outputFile);
             writeSubtitle(outputFile, sub, argv.timeOffset || 0);
         });
-    })
+    });
 });
 
 function readSubtitle(file) {
@@ -74,7 +81,7 @@ function readSubtitle(file) {
     if (/^[\n\s]*<SAMI/i.test(text)) {
         var syncs = text.match(/(<SYNC[^]*?)(?=\s*<SYNC|\s*<\/BODY)/gi);
         if (!syncs) {
-            console.log("No sync found");
+            console.error("%s: no sync found", file);
             return subs;
         }
 
@@ -188,7 +195,7 @@ function readSubtitle(file) {
                                     break;
 
                                 default:
-                                    console.error(`unknown command: ${cmd}`);
+                                    console.error('%s: unknown command %s', file, cmd);
                             }
                         }
                     });
@@ -214,7 +221,7 @@ function readSubtitle(file) {
         subs.push(sub);
     }
     else {
-        console.error("Unknown file format", [ file, text.charCodeAt(0), text.charCodeAt(1), text.charCodeAt(2) ]);
+        console.error("%s: unknown file format %j", file, [ text.charCodeAt(0), text.charCodeAt(1), text.charCodeAt(2) ]);
     }
 
     return subs;
