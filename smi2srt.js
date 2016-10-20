@@ -243,7 +243,7 @@ function writeSubtitle(file, sub, timeOffset) {
 function detectSubtitleLanguage(sub) {
     var texts = '';
     sub.forEach(ln => {
-        texts += ln.text;
+        texts += ln.text.replace(/<.*?>/g, '');
     });
     return languageDetector.detectOne(texts);
 }
