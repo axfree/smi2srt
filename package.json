@@ -1,6 +1,6 @@
 {
   "name": "smi2srt",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "",
   "main": "smi2srt.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "cheerio": "^0.20.0",
     "commander": "^2.9.0",
     "iconv-lite": "^0.4.13",
+    "langdetect": "https://github.com/mathiasbynens/node-language-detection#u8",
     "sprintf-js": "^1.0.3"
   }
 }
