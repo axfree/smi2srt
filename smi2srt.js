@@ -176,9 +176,9 @@ function readSubtitle(file) {
                         if (m) {
                             switch (m[1]) {
                                 case 'c':
-                                    var colorMatch = m[2].match(/&H(.*)&/);
+                                    var colorMatch = m[2].match(/&H(..)(..)(..)&/);
                                     if (colorMatch)
-                                        tags += `<font color="#${colorMatch[1]}">`;
+                                        tags += `<font color="#${colorMatch.splice(1).reverse().join('')}">`;
                                     break;
 
                                 case 'i':
