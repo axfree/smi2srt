@@ -54,16 +54,18 @@ argv.args.forEach(f => {
         var subs = readSubtitle(file);
         subs.forEach(sub => {
             var langCode = detectSubtitleLanguage(sub);
-            var outputFile = baseFile + '.' + langCode + '.srt';
-            if (argv.N) {
-                if (fs.existsSync(outputFile)) {
-                    console.log('%s: not overwritten', path.basename(outputFile));
-                    return;
+            if (langCode) {
+                var outputFile = baseFile + '.' + langCode + '.srt';
+                if (argv.N) {
+                    if (fs.existsSync(outputFile)) {
+                        console.log('%s: not overwritten', path.basename(outputFile));
+                        return;
+                    }
                 }
-            }
 
-            console.log('%s -> %s', file, outputFile);
-            writeSubtitle(outputFile, sub, argv.timeOffset || 0);
+                console.log('%s -> %s', file, outputFile);
+                writeSubtitle(outputFile, sub, argv.timeOffset || 0);
+            }
         });
     });
 });
@@ -245,7 +247,7 @@ function detectSubtitleLanguage(sub) {
     sub.forEach(ln => {
         texts += ln.text.replace(/<.*?>/g, '');
     });
-    return languageDetector.detectOne(texts);
+    return texts != '' ? languageDetector.detectOne(texts) : null;
 }
 
 function formatTime(t) {
