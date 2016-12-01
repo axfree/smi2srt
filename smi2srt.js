@@ -172,6 +172,7 @@ function readSubtitle(file) {
                 text = text.replace(/\\N/gi, '\n')
                            .replace(/{(.*?)}/g, (m, cmds) => {
                     var tags = '';
+                    var tagsOpen = {};
                     cmds.split('\\').forEach((cmd, idx) => {
                         if (idx == 0) return;
                         var m = cmd.match(/^([a-z]+)(.*)$/);
@@ -186,10 +187,15 @@ function readSubtitle(file) {
                                 case 'i':
                                 case 'b':
                                 case 'u':
-                                    if (parseInt(m[2]) > 0)
+                                    if (parseInt(m[2]) > 0) {
                                         tags += `<${m[1]}>`;
-                                    else
-                                        tags += `</${m[1]}>`;
+                                        tagsOpen[m[1]] = true;
+                                    }
+                                    else {
+                                        if (tagsOpen[m[1]])
+                                            tags += `</${m[1]}>`;
+                                        tagsOpen[m[1]] = false;
+                                    }
                                     break;
 
                                 case 'fs':
