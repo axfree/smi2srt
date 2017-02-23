@@ -20,6 +20,7 @@ argv
     .arguments('<file>')
     .option('-n', 'do not overwrite an existing file')
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
+    .option('-b, --time-begin <time>', 'specify the time begin for offset in miliseconds or H:mm:ss', parseTime, 0)
     .option('-i, --install-automator', 'install smi2srt OS X Automator')
     .parse(process.argv);
 
@@ -64,7 +65,7 @@ argv.args.forEach(f => {
                 }
 
                 console.log('%s -> %s', file, outputFile);
-                writeSubtitle(outputFile, sub, argv.timeOffset || 0);
+                writeSubtitle(outputFile, sub, argv.timeBegin, argv.timeOffset);
             }
         });
     });
@@ -109,9 +110,9 @@ function readSubtitle(file) {
             $('sync').get().sort((a, b) => { return +$(a).attr('start') - +$(b).attr('start') }).forEach((e, idx) => {
                 var sync = $(e);
                 var start = parseInt(sync.attr('start'));
-                var end = parseInt(sync.next().attr('start'));
+                var stop = parseInt(sync.next().attr('start'));
 
-                if (!end)
+                if (!stop)
                     return;
 
                 var p = sync.find('p');
@@ -121,7 +122,7 @@ function readSubtitle(file) {
                 if (p.text() != '' && p.text().trim() != '&nbsp;') {
                     sub.push({
                         start: start,
-                        end: end,
+                        stop: stop,
                         text: p.html().replace(/<br>\s*/g, '\n').trim()
                     })
                 }
@@ -142,7 +143,7 @@ function readSubtitle(file) {
                 if (m) {
                     sub.push({
                         start: 1000 * (60 * (60 * parseInt(m[2]) + parseInt(m[3])) + parseInt(m[4])) + parseInt(m[5]),
-                        end: 1000 * (60 * (60 * parseInt(m[6]) + parseInt(m[7])) + parseInt(m[8])) + parseInt(m[9]),
+                        stop: 1000 * (60 * (60 * parseInt(m[6]) + parseInt(m[7])) + parseInt(m[8])) + parseInt(m[9]),
                         text: m[11]
                     });
                 }
@@ -167,7 +168,7 @@ function readSubtitle(file) {
             e.replace(/^(.*?): (\d+),(\d):(\d\d):(\d\d)\.(\d\d),(\d):(\d\d):(\d\d)\.(\d\d),(.*?),(.*?),(\d+),(\d+),(\d+),(.*?),(.*)$/,
               (m, format, layer, s1, s2, s3, s4, e1, e2, e3, e4, style, name, marginL, marginR, marginV, effect, text) => {
                 var start = 1000 * (60 * (60 * parseInt(s1) + parseInt(s2)) + parseInt(s3)) + parseInt(s4) * 10;
-                var end = 1000 * (60 * (60 * parseInt(e1) + parseInt(e2)) + parseInt(e3)) + parseInt(e4) * 10;
+                var stop = 1000 * (60 * (60 * parseInt(e1) + parseInt(e2)) + parseInt(e3)) + parseInt(e4) * 10;
 
                 text = text.replace(/\\N/gi, '\n')
                            .replace(/{(.*?)}/g, (m, cmds) => {
@@ -220,7 +221,7 @@ function readSubtitle(file) {
 
                 sub.push({
                     start: start,
-                    end: end,
+                    stop: stop,
                     text: text
                 });
             });
@@ -235,11 +236,12 @@ function readSubtitle(file) {
     return subs;
 }
 
-function writeSubtitle(file, sub, timeOffset) {
+function writeSubtitle(file, sub, timeBegin, timeOffset) {
     var fd = fs.openSync(file, 'w');
     sub.forEach((ln, idx) => {
+        var offset = ln.start >= timeBegin ? timeOffset : 0;
         fs.writeSync(fd, (idx + 1) + '\n');
-        fs.writeSync(fd, formatTime(ln.start + timeOffset) + ' --> ' + formatTime(ln.end + timeOffset) + '\n');
+        fs.writeSync(fd, formatTime(ln.start + offset) + ' --> ' + formatTime(ln.stop + offset) + '\n');
         fs.writeSync(fd, ln.text + '\n');
         fs.writeSync(fd, '\n');
     })
@@ -258,6 +260,14 @@ function detectSubtitleLanguage(sub) {
 
 function formatTime(t) {
     return sprintf ("%02d:%02d:%02d,%03d", (t / 3600000), ((t / 60000)) % 60, ((t / 1000)) % 60, t % 1000);
+}
+
+function parseTime(s) {
+    var m = s.match(/^(?:(\d+):)?(\d\d):(\d\d)(?:,(\d\d\d))?$/);
+    if (m)
+        return 1000 * (60 * (60 * parseInt(m[1] || 0) + parseInt(m[2])) + parseInt(m[3])) + parseInt(m[4] || 0)
+
+    return parseInt(s);
 }
 
 // http://stackoverflow.com/questions/5827612/node-js-fs-readdir-recursive-directory-search

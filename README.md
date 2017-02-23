@@ -11,11 +11,18 @@ $ sudo npm install -g smi2srt
 
 ## Usage
 <pre>
-Usage: smi2srt [options] input.smi ...
+Usage: smi2srt [options] <file>
+
+smi2srt by axfree
+
 Options:
-  -h, --help          show usage information
-  -n                  do not overwrite an existing file
-  -t, --time-offset   specify the time offset in miliseconds
+
+  -h, --help                  output usage information
+  -v, --version               output the version number
+  -n                          do not overwrite an existing file
+  -t, --time-offset <offset>  specify the time offset in miliseconds
+  -b, --time-begin <time>     specify the time begin for offset in miliseconds or H:mm:ss
+  -i, --install-automator     install smi2srt OS X Automator
 </pre>
 
 ## License
