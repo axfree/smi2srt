@@ -20,8 +20,8 @@ Options:
   -h, --help                  output usage information
   -v, --version               output the version number
   -n                          do not overwrite an existing file
-  -t, --time-offset <offset>  specify the time offset in miliseconds
-  -b, --time-begin <time>     specify the time begin for offset in miliseconds or H:mm:ss
+  -t, --time-offset &lt;offset&gt;  specify the time offset in miliseconds
+  -b, --time-begin &lt;time&gt;     specify the time begin for offset in miliseconds or H:mm:ss
   -i, --install-automator     install smi2srt OS X Automator
 </pre>
 
