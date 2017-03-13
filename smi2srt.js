@@ -131,7 +131,7 @@ function readSubtitle(file) {
             subs.push(sub);
         }
     }
-    else if (/^\d{1,3}\n/.test(text)) {
+    else if (/^[\n\s]*\d{1,3}\n/.test(text)) {
         text = text.replace(/\n[ \t]+(?=\n)/g, '\n');
         text = text.replace(/\n(?=\n\n)/g, '');
         text = text.replace(/([^\n])(\n\d+\n\d\d:)/g, '$1\n$2');
@@ -152,7 +152,7 @@ function readSubtitle(file) {
 
         subs.push(sub);
     }
-    else if (/^\[Script Info\]/.test(text)) {
+    else if (/^[\n\s]*\[Script Info\]/.test(text)) {
         var sections = {};
         text.split('\n\n').map(sect => {
             sect.replace(/^\[(.*?)\]\n([^]*)$/, (m, hdr, cont) => {
