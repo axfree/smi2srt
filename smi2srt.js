@@ -19,6 +19,7 @@ argv
     .description('smi2srt by axfree')
     .arguments('<file>')
     .option('-n', 'do not overwrite an existing file')
+    .option('-l, --list-subtitles', 'list subtitles')
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
     .option('-b, --time-begin <time>', 'specify the time begin for offset in miliseconds or H:mm:ss', parseTime, 0)
     .option('-i, --install-automator', 'install smi2srt OS X Automator')
@@ -57,7 +58,7 @@ argv.args.forEach(f => {
             var langCode = detectSubtitleLanguage(sub);
             if (langCode) {
                 var outputFile = baseFile + '.' + langCode + '.srt';
-                if (argv.N) {
+                if (!argv.listSubtitles && argv.N) {
                     if (fs.existsSync(outputFile)) {
                         console.log('%s: not overwritten', path.basename(outputFile));
                         return;
@@ -65,7 +66,8 @@ argv.args.forEach(f => {
                 }
 
                 console.log('%s -> %s', file, outputFile);
-                writeSubtitle(outputFile, sub, argv.timeBegin, argv.timeOffset);
+                if (!argv.listSubtitles)
+                    writeSubtitle(outputFile, sub, argv.timeBegin, argv.timeOffset);
             }
         });
     });
