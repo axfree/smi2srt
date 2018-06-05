@@ -48,7 +48,7 @@ argv.args.forEach(f => {
     }
 
     files.forEach(file => {
-        var fileMatch = file.match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap))?(?:\.(smi|smil|srt|ass))$/i);
+        var fileMatch = file.match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap|zh-cn|chs|zh-tw|cht))?(?:\.(smi|smil|srt|ass))$/i);
         if (!fileMatch)
             return;
         var baseFile = fileMatch[1];
