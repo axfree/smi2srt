@@ -92,7 +92,7 @@ function readSubtitle(file) {
 
         var syncWithLang = {};
         syncs.forEach(function (sync, idx) {
-            var sync = cheerio.load(sync.replace(/&nbsp(?!;)/i, '&nbsp;'), {
+            var sync = cheerio.load(sync.replace(/&(nbsp|lt|gt)(?!;)/gi, '&$1;'), {
                  normalizeWhitespace:true,
                              xmlMode:false,
                       decodeEntities:false
