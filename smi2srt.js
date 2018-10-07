@@ -19,6 +19,7 @@ argv
     .description('smi2srt by axfree')
     .arguments('<file>')
     .option('-n', 'do not overwrite an existing file')
+    .option('-d, --output-directory <directory>', 'specify optional output directory')
     .option('-l, --list-subtitles', 'list subtitles')
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
     .option('-b, --time-begin <time>', 'specify the time begin for offset in miliseconds or H:mm:ss', parseTime, 0)
@@ -52,12 +53,13 @@ argv.args.forEach(f => {
         if (!fileMatch)
             return;
         var baseFile = fileMatch[1];
+        var baseDir = argv.outputDirectory || path.dirname(file);
 
         var subs = readSubtitle(file);
         subs.forEach(sub => {
             var langCode = detectSubtitleLanguage(sub);
             if (langCode) {
-                var outputFile = baseFile + '.' + langCode + '.srt';
+                var outputFile = path.join(baseDir, baseFile + '.' + langCode + '.srt');
                 if (!argv.listSubtitles && argv.N) {
                     if (fs.existsSync(outputFile)) {
                         console.log('%s: not overwritten', path.basename(outputFile));
