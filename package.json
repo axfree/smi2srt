@@ -1,6 +1,6 @@
 {
   "name": "smi2srt",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "",
   "main": "smi2srt.js",
   "scripts": {

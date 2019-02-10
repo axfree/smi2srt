@@ -23,6 +23,7 @@ argv
     .option('-l, --list-subtitles', 'list subtitles')
     .option('-t, --time-offset <offset>', 'specify the time offset in miliseconds', parseInt, 0)
     .option('-b, --time-begin <time>', 'specify the time begin for offset in miliseconds or H:mm:ss', parseTime, 0)
+    .option('-x, --remove-original-file', 'remove original file after successful conversion')
     .option('-i, --install-automator', 'install smi2srt OS X Automator')
     .parse(process.argv);
 
@@ -54,24 +55,30 @@ argv.args.forEach(f => {
             return;
         var baseFile = fileMatch[1];
         var baseDir = argv.outputDirectory || path.dirname(file);
+        var outputFiles = [];
 
         var subs = readSubtitle(file);
         subs.forEach(sub => {
             var langCode = detectSubtitleLanguage(sub);
             if (langCode) {
                 var outputFile = path.join(baseDir, baseFile + '.' + langCode + '.srt');
-                if (!argv.listSubtitles && argv.N) {
-                    if (fs.existsSync(outputFile)) {
-                        console.log('%s: not overwritten', path.basename(outputFile));
-                        return;
-                    }
-                }
+                outputFiles.push(outputFile);
 
                 console.log('%s -> %s', file, outputFile);
-                if (!argv.listSubtitles)
-                    writeSubtitle(outputFile, sub, argv.timeBegin, argv.timeOffset);
+                if (argv.listSubtitles)
+                    return;
+
+                if (argv.N && fs.existsSync(outputFile)) {
+                    console.log('%s: not overwritten', path.basename(outputFile));
+                    return;
+                }
+
+                writeSubtitle(outputFile, sub, argv.timeBegin, argv.timeOffset);
             }
         });
+
+        if (argv.removeOriginalFile && outputFiles.length > 0 && !outputFiles.includes(file))
+            fs.unlinkSync(file);
     });
 });
 
@@ -242,16 +249,18 @@ function readSubtitle(file) {
 
 function writeSubtitle(file, sub, timeBegin, timeOffset) {
     var fd = fs.openSync(file, 'w');
-    sub.forEach((ln, idx) => {
-        var offset = ln.start >= timeBegin ? timeOffset : 0;
-        fs.writeSync(fd, (idx + 1) + '\n');
-        fs.writeSync(fd, formatTime(ln.start + offset) + ' --> ' + formatTime(ln.stop + offset) + '\n');
-        fs.writeSync(fd, ln.text + '\n');
-        fs.writeSync(fd, '\n');
-    })
-    fs.closeSync(fd);
-
-    return true;
+    try {
+        sub.forEach((ln, idx) => {
+            var offset = ln.start >= timeBegin ? timeOffset : 0;
+            fs.writeSync(fd, (idx + 1) + '\n');
+            fs.writeSync(fd, formatTime(ln.start + offset) + ' --> ' + formatTime(ln.stop + offset) + '\n');
+            fs.writeSync(fd, ln.text + '\n');
+            fs.writeSync(fd, '\n');
+        })
+    }
+    finally {
+        fs.closeSync(fd);
+    }
 }
 
 function detectSubtitleLanguage(sub) {
