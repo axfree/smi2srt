@@ -9,6 +9,7 @@ var ps        = require('child_process');
 var sprintf   = require('sprintf-js').sprintf;
 var charsetDetector
               = require("charset-detector");
+var locale    = require('locale-codes');
 var languageDetector
               = require('langdetect');
 var iconv     = require('iconv-lite');
@@ -50,11 +51,16 @@ argv.args.forEach(f => {
     }
 
     files.forEach(file => {
-        var fileMatch = path.basename(file).match(/^(.*?)(?:\.(en|eng|ko|kor|ja|jap|zh-cn|chs|zh-tw|cht))?(?:\.(smi|smil|srt|ass))$/i);
+        var fileMatch = path.basename(file).match(/^(.*?)(?:\.([a-z]{3}|[a-z]{2}(?:-[a-z]{2})?))?(?:\.(smi|smil|srt|ass))$/i);
         if (!fileMatch)
             return;
         var baseFile = fileMatch[1];
         var baseDir = argv.outputDirectory || path.dirname(file);
+        var lang = fileMatch[2];
+        if (lang) {
+            if (!locale.where('tag', lang))
+                baseFile += '.' + lang;
+        }
         var outputFiles = [];
 
         var subs = readSubtitle(file);
