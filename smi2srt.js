@@ -67,7 +67,9 @@ argv.args.forEach(f => {
         subs.forEach(sub => {
             var langCode = detectSubtitleLanguage(sub);
             if (langCode) {
-                var outputFile = path.join(baseDir, baseFile + '.' + langCode + '.srt');
+                var outputFile = baseFile.endsWith('.' + langCode)
+                    ? path.join(baseDir, baseFile + '.srt')
+                    : path.join(baseDir, baseFile + '.' + langCode + '.srt');
                 outputFiles.push(outputFile);
 
                 console.log('%s -> %s', file, outputFile);
@@ -98,7 +100,7 @@ function readSubtitle(file) {
 
     var text = iconv.decode(buffer, charset).replace(/\r\n/g, '\n');
 
-    if (/^[\n\s]*<SAMI/i.test(text)) {
+    if (/<SAMI>[^]*<\/SAMI>/i.test(text)) {
         var syncs = text.match(/(<SYNC[^]*?)(?=\s*<SYNC|\s*<\/BODY)/gi);
         if (!syncs) {
             console.error("%s: no sync found", file);
